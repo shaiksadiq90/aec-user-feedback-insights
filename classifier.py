@@ -45,7 +45,7 @@ class FeedbackClassifier:
     def classify_feedback(self, review_text):
         """Use GPT-4o to classify a single review"""
         try:
-            response = self.client.messages.create(
+            response = self.client.chat.completions.create(
                 model=self.model,
                 max_tokens=500,
                 messages=[
@@ -58,6 +58,7 @@ class FeedbackClassifier:
             
             # Extract JSON from response
             response_text = response.content[0].text
+            print(f"DEBUG: Raw response: {response_text[:200]}")
             
             # Try to parse JSON from response
             try:
