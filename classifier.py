@@ -56,17 +56,14 @@ class FeedbackClassifier:
                 ]
             )
             
-            # Extract JSON from response
-            response_text = response.content[0].text
-            print(f"DEBUG: Raw response: {response_text[:200]}")
+            # Extract text from response
+            response_text = response.choices[0].message.content
             
             # Try to parse JSON from response
             try:
-                # Look for JSON block
                 if '```json' in response_text:
                     json_str = response_text.split('```json')[1].split('```')[0].strip()
                 elif '{' in response_text:
-                    # Extract JSON object
                     start_idx = response_text.find('{')
                     end_idx = response_text.rfind('}') + 1
                     json_str = response_text[start_idx:end_idx]
@@ -97,8 +94,8 @@ class FeedbackClassifier:
                     sentiment_score,
                     friction_category,
                     product_mention,
-                    tyto_component,
-                    tyto_specific_solution,
+                    ai_solution,
+                    solution_type,
                     adoption_barrier,
                     adoption_lever,
                     outcome_amplification,
@@ -113,8 +110,8 @@ class FeedbackClassifier:
                 float(classification.get('sentiment_score', 0)),
                 classification.get('friction_category'),
                 classification.get('product_mention'),
-                classification.get('tyto_component'),
-                classification.get('tyto_specific_solution'),
+                classification.get('ai_solution'),
+                classification.get('solution_type'),
                 classification.get('adoption_barrier'),
                 classification.get('adoption_lever'),
                 classification.get('outcome_amplification'),
@@ -143,7 +140,6 @@ class FeedbackClassifier:
             return
         
         try:
-            # Get unclassified feedback
             unclassified = self.get_unclassified_feedback(conn)
             logger.info(f"Found {len(unclassified)} unclassified reviews")
             
@@ -151,7 +147,6 @@ class FeedbackClassifier:
                 logger.info("No unclassified feedback to process")
                 return
             
-            # Classify each review
             processed = 0
             for feedback_id, review_text, source in unclassified:
                 logger.info(f"Classifying feedback {feedback_id} from {source}...")
